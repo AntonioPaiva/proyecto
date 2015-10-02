@@ -1,0 +1,51 @@
+package py.consultoresinformaticos.filtros;
+
+import java.io.IOException;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+
+import py.consultoresinformaticos.utils.LoggerGx;
+import py.consultoresinformaticos.DTO.LoginDTO;
+
+public class SessionFilter implements Filter {
+
+    public SessionFilter() {
+
+    }
+
+	public void destroy() {
+
+	}
+
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+		try{			
+			HttpServletRequest httpRequest = (HttpServletRequest) request;			
+
+			if(null != httpRequest.getSession(false)){	
+				LoginDTO usuario = (LoginDTO) httpRequest.getSession(false).getAttribute("usuarioLogeado");
+				if(usuario == null){
+					request.getRequestDispatcher("login.jsp").forward(request, response);
+					System.out.println("Usuario es null");
+				}else
+				{
+					System.out.println("Usuario: " + usuario.getUserName());
+					chain.doFilter(request, response);
+				}
+			}else{
+				chain.doFilter(request, response);
+			}
+		}
+		catch (Exception ex){
+			LoggerGx.log("SessionFilter Error > " + ex.toString());
+		}
+	}
+	
+	public void init(FilterConfig fConfig) throws ServletException {
+
+	}
+}

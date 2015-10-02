@@ -1,0 +1,72 @@
+package py.consultoresinformaticos.DTO;
+
+import java.sql.Date;
+
+public class TareaDTO {
+	private int id;
+	private ModuloDTO modulo;
+	private ProyectoDTO proyecto;
+	private UsuarioDTO usuario;
+	private TipoDTO tipo;
+	private Date fecha_ini;
+	private Date fecha_fin;
+	private Date fecha_culm;
+	private boolean enHito;
+	
+	public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
+	}
+	public ModuloDTO getModulo() {
+		return modulo;
+	}
+	public void setModulo(ModuloDTO modulo) {
+		this.modulo = modulo;
+	}
+	public ProyectoDTO getProyecto() {
+		return proyecto;
+	}
+	public void setProyecto(ProyectoDTO proyecto) {
+		this.proyecto = proyecto;
+	}
+	public UsuarioDTO getUsuario() {
+		return usuario;
+	}
+	public void setUsuario(UsuarioDTO usuario) {
+		this.usuario = usuario;
+	}
+	public TipoDTO getTipo() {
+		return tipo;
+	}
+	public void setTipo(TipoDTO tipo) {
+		this.tipo = tipo;
+	}
+	public Date getFecha_ini() {
+		return fecha_ini;
+	}
+	public void setFecha_ini(Date fecha_ini) {
+		this.fecha_ini = fecha_ini;
+	}
+	public Date getFecha_fin() {
+		return fecha_fin;
+	}
+	public void setFecha_fin(Date fecha_fin) {
+		this.fecha_fin = fecha_fin;
+	}
+	public Date getFecha_culm() {
+		return fecha_culm;
+	}
+	public void setFecha_culm(Date fecha_culm) {
+		this.fecha_culm = fecha_culm;
+	}
+
+	public boolean getEnHito() {
+		return enHito;
+	}
+	public void setEnHito(boolean enHito) {
+		this.enHito = enHito;
+	}
+
+}

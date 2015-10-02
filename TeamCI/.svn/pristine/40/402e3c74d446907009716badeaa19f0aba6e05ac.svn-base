@@ -1,0 +1,172 @@
+package py.consultoresinformaticos.DAO.impl;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import py.consultoresinformaticos.DAO.DaoFactory;
+import py.consultoresinformaticos.DAO.TareaDAO;
+import py.consultoresinformaticos.DTO.TareaDTO;
+import py.consultoresinformaticos.connections.ManejadorBD;
+
+public class TareaDAOImpl implements TareaDAO{
+
+	@Override
+	public void insertar(TareaDTO tarea) {
+		String sql = "INSERT INTO " +
+				"tarea(modulo, proyecto, usuario, tipo, fecha_ini, fecha_fin, fecha_culm)" +
+				" VALUES (?, ?, ?, ?, ?, ?, ?)";
+		PreparedStatement stm;
+		try {
+			stm = ManejadorBD.getCon().prepareStatement(sql);
+			stm.setInt(1, tarea.getModulo().getId());
+			stm.setInt(2, tarea.getProyecto().getId());
+			stm.setInt(3, tarea.getUsuario().getId());
+			stm.setInt(4, tarea.getTipo().getId());
+			stm.setDate(5, tarea.getFecha_ini());
+			stm.setDate(6, tarea.getFecha_fin());
+			stm.setDate(7, tarea.getFecha_culm());
+			stm.executeUpdate();
+		} catch (SQLException e) {
+			System.err.println("No se pudo insertar el componente. " +e.getMessage());
+		}
+		
+	}
+
+	@Override
+	public void borrar(int id) {
+		String sql ="DELETE FROM tarea WHERE id= "+id;
+		PreparedStatement stm;
+		try
+		{
+			stm = ManejadorBD.getCon().prepareStatement(sql);
+			stm.executeUpdate();
+		}
+		catch(SQLException e)
+		{
+			 System.err.println("No se pudo eliminar el componente." +e.getMessage());
+		}
+		
+	}
+
+	@Override
+	public void actualizar(TareaDTO tarea) {
+		String sql ="UPDATE tarea SET modulo=?, proyecto=?, usuario=?, tipo=?, " +
+				"fecha_ini=?, fecha_fin=?, fecha_culm=? WHERE id=?";
+		PreparedStatement stm;
+        try {
+			stm = ManejadorBD.getCon().prepareStatement(sql);
+			stm.setInt(1,tarea.getModulo().getId());
+	        stm.setInt(2, tarea.getProyecto().getId());
+	        stm.setInt(3, tarea.getUsuario().getId());
+	        stm.setInt(4, tarea.getTipo().getId());
+	        stm.setDate(5, tarea.getFecha_ini());
+	        stm.setDate(6, tarea.getFecha_fin());
+	        stm.setDate(7, tarea.getFecha_culm());
+	        stm.setInt(8, tarea.getId()); 
+	        stm.executeUpdate();
+		} catch (SQLException e) {
+			System.err.println("No se pudo actualizar el componente. " + e.getMessage());
+		}
+		
+	}
+
+	@Override
+	public TareaDTO getTareaPorId(int id) {
+		TareaDTO tarea = null;
+		String sql = "SELECT id, modulo, proyecto, usuario, " +
+				"tipo, fecha_ini, fecha_fin, fecha_culm FROM tarea WHERE id="+id;
+		PreparedStatement stm; 
+		ResultSet rs = null;
+		try {
+			stm = ManejadorBD.getCon().prepareStatement(sql);
+			rs = stm.executeQuery();
+			while(rs.next())
+			{
+				tarea = new TareaDTO();
+				tarea.setId(rs.getInt("id"));
+				tarea.setModulo(DaoFactory.getModuloDAOImpl().obtenerModuloPorId(rs.getInt("modulo")));
+				tarea.setProyecto(DaoFactory.getProyectoDAOImpl().obtenerProyectoPorId(rs.getInt("proyecto")));
+				tarea.setUsuario(DaoFactory.getUsuarioDAOImpl().obtenerUsuarioPorId(rs.getInt("usuario")));
+				tarea.setTipo(DaoFactory.getTipoDAOImpl().getTipoPorId(rs.getInt("tipo")));
+				tarea.setFecha_ini(rs.getDate("fecha_ini"));
+				tarea.setFecha_fin(rs.getDate("fecha_fin"));
+				tarea.setFecha_culm(rs.getDate("fecha_culm"));
+			}
+		} catch (SQLException e) {
+			System.err.println("No se pudo retornar el id del Componente. " +e.getMessage());
+		}
+		return tarea;
+	}
+
+	@Override
+	public List<TareaDTO> listar() {
+		String sql = "SELECT id, modulo, proyecto, usuario, tipo, fecha_ini, fecha_fin, fecha_culm " +
+				"FROM tarea";
+		PreparedStatement stm;
+		ResultSet rs = null;
+		List<TareaDTO> listaTarea = new ArrayList<TareaDTO>();
+		TareaDTO tarea = null;
+		try {
+			stm = ManejadorBD.getCon().prepareStatement(sql);
+			rs = stm.executeQuery();
+			while(rs.next()){
+				tarea = new TareaDTO();
+				tarea.setId(rs.getInt("id"));
+				tarea.setModulo(DaoFactory.getModuloDAOImpl().obtenerModuloPorId(rs.getInt("modulo")));
+				tarea.setProyecto(DaoFactory.getProyectoDAOImpl().obtenerProyectoPorId(rs.getInt("proyecto")));
+				tarea.setUsuario(DaoFactory.getUsuarioDAOImpl().obtenerUsuarioPorId(rs.getInt("usuario")));
+				tarea.setTipo(DaoFactory.getTipoDAOImpl().getTipoPorId(rs.getInt("tipo")));
+				tarea.setFecha_ini(rs.getDate("fecha_ini"));
+				tarea.setFecha_fin(rs.getDate("fecha_fin"));
+				tarea.setFecha_culm(rs.getDate("fecha_culm"));
+				listaTarea.add(tarea);
+			}
+		} catch (SQLException e) {
+			System.err.println("No se pudo listar. " +e.getMessage());
+		}
+		return listaTarea;
+	}
+	
+	public List<TareaDTO> listarHitoTareas(int idhito, int proyecto) {
+		String sql = "select " +
+							"t.id, " +
+							"idtarea " +
+					 "from " +
+					 		"tarea t left join hito_tarea ht on (t.id = ht.idtarea) " +
+					 "where " +
+					 		"t.proyecto = " + proyecto +
+					 "order by " +
+					 		"t.id, " +
+					 		"ht.idhito";
+		
+		PreparedStatement stm;
+		ResultSet rs = null;
+		List<TareaDTO> listaTarea = new ArrayList<TareaDTO>();
+		TareaDTO tarea = null;
+		try {
+			stm = ManejadorBD.getCon().prepareStatement(sql);
+			rs = stm.executeQuery();
+			while(rs.next()){
+				
+				System.out.println("Tarea: " + rs.getInt("id"));
+				System.out.println("IDTAREA: " + rs.getInt("idtarea"));
+				
+				tarea = getTareaPorId(rs.getInt("id"));
+				
+				if(rs.getInt("idtarea") != 0){
+					tarea.setEnHito(true);
+				}else{
+					tarea.setEnHito(false);
+				}
+				listaTarea.add(tarea);
+			}
+		} catch (SQLException e) {
+			System.err.println("No se pudo listar. " +e.getMessage());
+		}
+		return listaTarea;
+	}	
+	
+}

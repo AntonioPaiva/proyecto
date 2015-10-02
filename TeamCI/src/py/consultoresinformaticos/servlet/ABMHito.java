@@ -1,0 +1,150 @@
+package py.consultoresinformaticos.servlet;
+
+import java.io.IOException;
+import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.List;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import py.consultoresinformaticos.DAO.DaoFactory;
+import py.consultoresinformaticos.DTO.HitoDTO;
+import py.consultoresinformaticos.DTO.ProyectoDTO;
+import py.consultoresinformaticos.connections.RetornarOperacion;
+
+/**
+ * Servlet implementation class Hitos
+ */
+public class ABMHito extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+       
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public ABMHito() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		try
+		{
+			HttpSession session = request.getSession(false);
+			List<HitoDTO> lista;
+			List<ProyectoDTO> listaProyecto;
+			HitoDTO hito;
+			int idOperacion;
+			
+			String operacion = request.getParameter("operacion") == null ? "" : request.getParameter("operacion");
+			idOperacion = RetornarOperacion.retornarIdOperacion(operacion);
+			
+			if(session != null)
+			{
+		        switch (idOperacion) 
+				{
+					case 1:
+						hito = DaoFactory.getHitoDAOImpl().getHitosPorId(Integer.parseInt(request.getParameter("id").trim()));
+						request.setAttribute("hito", hito);
+						
+						lista = DaoFactory.getHitoDAOImpl().listar();
+						listaProyecto = DaoFactory.getProyectoDAOImpl().listar();
+						
+						request.setAttribute("listaHitos", lista);
+						request.setAttribute("listaProyecto", listaProyecto);
+						
+						request.setAttribute("operacion","Editar");
+						request.getRequestDispatcher("hitos.jsp").forward(request, response);
+						break;
+					case 2:
+						DaoFactory.getHitoDAOImpl().borrar(Integer.parseInt(request.getParameter("id").trim()));
+						lista = DaoFactory.getHitoDAOImpl().listar();
+						listaProyecto = DaoFactory.getProyectoDAOImpl().listar();
+						
+						request.setAttribute("listaHitos", lista);
+						request.setAttribute("listaProyecto", listaProyecto);
+						request.setAttribute("operacion","Eliminar");
+						request.getRequestDispatcher("hitos.jsp").forward(request, response);
+						break;
+					case 3:
+						hito = new HitoDTO();
+						hito.setProyecto(DaoFactory.getProyectoDAOImpl().obtenerProyectoPorId(Integer.parseInt(request.getParameter("proyecto").trim())));
+						hito.setDescripcion(request.getParameter("descripcion"));						
+						hito.setFecha(obtenerFecha(request.getParameter("fecha")));
+
+                        request.setAttribute("operacion", "Agregar");
+                        
+                        DaoFactory.getHitoDAOImpl().insertar(hito);
+                        lista = DaoFactory.getHitoDAOImpl().listar();
+                        listaProyecto = DaoFactory.getProyectoDAOImpl().listar();
+                        request.setAttribute("listaHitos", lista);
+                        request.setAttribute("listaProyecto", listaProyecto);        
+                        request.getRequestDispatcher("hitos.jsp").forward(request, response);
+						break;
+					case 4:
+						hito = new HitoDTO();
+						hito.setId(Integer.parseInt(request.getParameter("id")));
+						hito.setProyecto(DaoFactory.getProyectoDAOImpl().obtenerProyectoPorId(Integer.parseInt(request.getParameter("proyecto").trim())));						
+						hito.setDescripcion(request.getParameter("descripcion"));
+						hito.setFecha(obtenerFecha(request.getParameter("fecha")));
+						
+						
+						DaoFactory.getHitoDAOImpl().actualizar(hito);
+						
+						lista = DaoFactory.getHitoDAOImpl().listar();
+						listaProyecto = DaoFactory.getProyectoDAOImpl().listar();
+						request.setAttribute("listaHitos", lista);
+						request.setAttribute("listaProyecto", listaProyecto);
+						request.setAttribute("listaHitos", lista);
+						
+						request.setAttribute("operacion","Modificar");
+						request.getRequestDispatcher("hitos.jsp").forward(request, response);
+						break;
+					default:
+						lista = DaoFactory.getHitoDAOImpl().listar();
+						listaProyecto = DaoFactory.getProyectoDAOImpl().listar();
+						
+						request.setAttribute("listaHitos", lista);
+						request.setAttribute("listaProyecto", listaProyecto);
+						
+						request.getRequestDispatcher("hitos.jsp").forward(request, response);
+						break;
+				}
+			}
+			else
+			{
+				request.getRequestDispatcher("hitos.jsp").forward(request, response);
+			}
+				
+		}
+		catch(Exception ex)
+		{
+			System.err.println("Error. " +ex.getMessage());		
+		} 
+	}
+	private static Date obtenerFecha(String fecha)
+	{
+
+	     SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+	     java.sql.Date fechaFormateada = null;
+	    try {
+	        fechaFormateada = new java.sql.Date(sdf.parse(fecha).getTime());
+	    } catch (ParseException e) {
+	        e.printStackTrace();
+	    }
+	     return fechaFormateada;
+	 }
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		this.doGet(request, response);
+	}
+
+}

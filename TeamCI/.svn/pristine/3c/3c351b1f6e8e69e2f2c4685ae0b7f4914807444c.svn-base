@@ -1,0 +1,181 @@
+package py.consultoresinformaticos.ajax;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.google.gson.Gson;
+
+import py.consultoresinformaticos.DAO.DaoFactory;
+import py.consultoresinformaticos.DTO.CartaGanttDTO;
+import py.consultoresinformaticos.DTO.ModuloDTO;
+import py.consultoresinformaticos.DTO.TareaDTO;
+import py.consultoresinformaticos.utils.LoggerGx;
+
+public class ConsultaAjax extends HttpServlet {
+
+	private static final long serialVersionUID = 1L;
+
+	protected void tareasAjax(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, java.io.IOException {
+        try{
+			List<ModuloDTO> modulos = DaoFactory.getModuloDAOImpl().listar();
+		    String json = new Gson().toJson(modulos);
+        	
+		    response.setContentType("application/json");
+		    response.setCharacterEncoding("UTF-8");
+		    response.getWriter().write(json);
+        }catch(Exception ex){
+        	LoggerGx.log("TAREASAJAX > Error " + ex.getMessage());
+        }
+	}
+
+	protected void hitosAjax(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, java.io.IOException {
+        try{        	
+			List<TareaDTO> tareas = DaoFactory.getTareaDAOImpl().listar();
+		    String json = new Gson().toJson(tareas);
+        	
+		    response.setContentType("application/json");
+		    response.setCharacterEncoding("UTF-8");
+		    response.getWriter().write(json);
+        }catch(Exception ex){
+        	LoggerGx.log("HITOSAJAX > Error " + ex.getMessage());
+        }
+	}
+
+	protected void cartaGantt(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, java.io.IOException 
+	{
+        try
+        {        	
+        	TareaDTO tarea 			 	   = new TareaDTO();
+			List<TareaDTO> tareas 	 	   = DaoFactory.getTareaDAOImpl().cartaGantt(1);
+			List<CartaGanttDTO> listaGantt = new ArrayList<CartaGanttDTO>();
+			CartaGanttDTO cartaGantt 	   = new CartaGanttDTO();
+			Random random 			 	   = new Random(); 
+			String colores[] 		 	   = {"ganttRed","ganttGreen","ganttBlue","ganttOrange"}; 
+			Integer comp 			 	   = 0;
+			boolean ban 			 	   = true;
+			tarea 						   = tareas.get(0);
+			comp  						   = tarea.getModulo().getComponente().getId();
+			int aux						   = 0;
+			int pos 	 				   = 0;
+			for (int i = 0; i < tareas.size(); i++) 
+			{
+				tarea = tareas.get(i);
+				if (ban == true) 
+				{
+					cartaGantt.setName(tarea.getModulo().getComponente().getDescripcion());
+					ban = false;
+				}else
+				{
+					cartaGantt.setName("");					
+				}
+				
+				cartaGantt.setDesc(tarea.getTipo().getDescripcion());
+				
+				String from  = "/Date("+tarea.getFecha_ini().getTime() + ")/";
+				String to 	 = "/Date("+tarea.getFecha_fin().getTime() + ")/";
+				
+				//				String label = "<a href=\"javascript: someFunc();\">" + tarea.getModulo().getDescripcion() + "(" +tarea.getAvance() + "%)</a>" ;
+				String label = "<a href=\"javascript: someFunc(" + tarea.getId() + ");\">" + tarea.getModulo().getDescripcion() + "(" +tarea.getAvance() + "%)</a>" ;
+
+				while (pos == aux){
+					pos 	 = random.nextInt(4); 
+				}
+				aux = pos;
+				
+				cartaGantt.setValues(from, to, label, colores[pos]);
+				
+				if(tareas.get(i).getModulo().getComponente().getId() != comp)
+				{
+					comp = tareas.get(i).getModulo().getComponente().getId();
+					ban  = true;
+				}
+				listaGantt.add(cartaGantt);
+				cartaGantt 	   = new CartaGanttDTO();
+			}
+			String json = new Gson().toJson(listaGantt);
+			response.setContentType("application/json");
+		    response.setCharacterEncoding("UTF-8");
+		    response.getWriter().write(json);
+        }
+        catch(Exception ex)
+        {
+        	LoggerGx.log("CARTAGANTT > Error " + ex.getMessage());
+        }
+	}
+
+	protected void tareaGantt(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, java.io.IOException {
+        try{
+        	System.out.println("Tarea" + request.getParameter("tarea").toString());
+			TareaDTO tarea = DaoFactory.getTareaDAOImpl().getTareaPorId(Integer.parseInt(request.getParameter("tarea").toString()));
+		    String json = new Gson().toJson(tarea);
+        	
+		    response.setContentType("application/json");
+		    response.setCharacterEncoding("UTF-8");
+		    response.getWriter().write(json);
+        }catch(Exception ex){
+        	LoggerGx.log("TAREAGANTT > Error " + ex.getMessage());
+        }
+	}
+	
+	protected void doGet(HttpServletRequest request,HttpServletResponse response)
+			throws ServletException, java.io.IOException 
+	{
+		try
+		{
+			String origen = request.getParameter("origen").toString();
+			switch (origen) 
+			{
+				case "HITOS":
+					hitosAjax(request, response);
+					break;
+				case "TAREAS":
+					tareasAjax(request, response);
+					break;
+				case "GANTT":
+					cartaGantt(request, response);
+				case "TAREAGANTT":
+					tareaGantt(request, response);					
+					break;
+			}
+		}catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, java.io.IOException 
+	{
+		try
+		{
+			String origen = request.getParameter("origen").toString();
+			switch (origen) 
+			{
+				case "HITOS":
+					hitosAjax(request, response);
+					break;
+				case "TAREAS":
+					tareasAjax(request, response);
+					break;
+				case "GANTT":
+					cartaGantt(request, response);
+				case "TAREAGANTT":
+					tareaGantt(request, response);					
+					break;
+			}
+		}catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+	}
+}

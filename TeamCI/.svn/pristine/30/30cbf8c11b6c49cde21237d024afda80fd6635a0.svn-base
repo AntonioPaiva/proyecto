@@ -1,0 +1,207 @@
+package py.consultoresinformaticos.servlet;
+
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.List;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import py.consultoresinformaticos.DAO.DaoFactory;
+import py.consultoresinformaticos.DTO.LoginDTO;
+import py.consultoresinformaticos.DTO.ModuloDTO;
+import py.consultoresinformaticos.DTO.ProyectoDTO;
+import py.consultoresinformaticos.DTO.TareaDTO;
+import py.consultoresinformaticos.DTO.TipoDTO;
+import py.consultoresinformaticos.DTO.UsuarioDTO;
+import py.consultoresinformaticos.connections.RetornarOperacion;
+
+/**
+ * Servlet implementation class ABMTarea
+ */
+public class ABMTarea extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+       
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public ABMTarea() {
+        super();
+    }
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+	{
+		try
+		{
+			List<TareaDTO> lista;
+			List<ModuloDTO> listaModulo;
+			List<ProyectoDTO> listaProyecto;
+			List<UsuarioDTO> listaUsuario;
+			List<TipoDTO> listaTipo;
+			TareaDTO tarea;
+			int idOperacion;
+	 	 	LoginDTO usuarioLogeado = (LoginDTO)request.getSession().getAttribute("usuarioLogeado");
+	 	 	
+			String operacion = request.getParameter("operacion") == null ? "" : request.getParameter("operacion");
+			idOperacion = RetornarOperacion.retornarIdOperacion(operacion);
+			
+	        if(usuarioLogeado != null)
+	        {
+		        switch (idOperacion) 
+				{
+					case 1:
+						tarea = DaoFactory.getTareaDAOImpl().getTareaPorId(Integer.parseInt(request.getParameter("id").trim()));
+						request.setAttribute("tarea", tarea);
+						
+						lista = DaoFactory.getTareaDAOImpl().listar();
+						listaModulo = DaoFactory.getModuloDAOImpl().listar();
+						listaProyecto = DaoFactory.getProyectoDAOImpl().listar();
+						listaUsuario = DaoFactory.getUsuarioDAOImpl().listar();
+						listaTipo = DaoFactory.getTipoDAOImpl().listar();
+						
+						request.setAttribute("listaTarea", lista);
+						request.setAttribute("listaModulo", listaModulo);
+						request.setAttribute("listaProyecto", listaProyecto);
+						request.setAttribute("listaUsuario", listaUsuario);
+						request.setAttribute("listaTipo", listaTipo);
+						
+						request.setAttribute("operacion","Editar");
+						request.getRequestDispatcher("tarea.jsp").forward(request, response);
+						break;
+					case 2:
+						DaoFactory.getTareaDAOImpl().borrar(Integer.parseInt(request.getParameter("id").trim()));
+						lista = DaoFactory.getTareaDAOImpl().listar();
+						request.setAttribute("listaTarea", lista);
+						listaModulo = DaoFactory.getModuloDAOImpl().listar();
+						listaProyecto = DaoFactory.getProyectoDAOImpl().listar();
+						listaUsuario = DaoFactory.getUsuarioDAOImpl().listar();
+						listaTipo = DaoFactory.getTipoDAOImpl().listar();
+						
+						request.setAttribute("listaTarea", lista);
+						request.setAttribute("listaModulo", listaModulo);
+						request.setAttribute("listaProyecto", listaProyecto);
+						request.setAttribute("listaUsuario", listaUsuario);
+						request.setAttribute("listaTipo", listaTipo);
+						request.setAttribute("operacion","Eliminar");
+						request.getRequestDispatcher("tarea.jsp").forward(request, response);
+						break;
+					case 3:
+						tarea = new TareaDTO();
+						
+						tarea.setModulo(DaoFactory.getModuloDAOImpl().obtenerModuloPorId(Integer.parseInt(request.getParameter("modulo").trim())));
+						tarea.setProyecto(DaoFactory.getProyectoDAOImpl().obtenerProyectoPorId(Integer.parseInt(request.getParameter("proyecto").trim())));
+						tarea.setUsuario(DaoFactory.getUsuarioDAOImpl().obtenerUsuarioPorId(Integer.parseInt(request.getParameter("usuario").trim())));
+						tarea.setTipo(DaoFactory.getTipoDAOImpl().getTipoPorId(Integer.parseInt(request.getParameter("tipo").trim())));
+						tarea.setFecha_ini(obtenerFecha(request.getParameter("fecha_ini")));
+						tarea.setFecha_fin(obtenerFecha(request.getParameter("fecha_fin")));
+						tarea.setFecha_culm(obtenerFecha(request.getParameter("fecha_culm")));
+						
+						DaoFactory.getTareaDAOImpl().insertar(tarea);
+						
+						lista = DaoFactory.getTareaDAOImpl().listar();
+						listaModulo = DaoFactory.getModuloDAOImpl().listar();
+						listaProyecto = DaoFactory.getProyectoDAOImpl().listar();
+						listaUsuario = DaoFactory.getUsuarioDAOImpl().listar();
+						listaTipo = DaoFactory.getTipoDAOImpl().listar();
+						
+						request.setAttribute("listaTarea", lista);
+						request.setAttribute("listaModulo", listaModulo);
+						request.setAttribute("listaProyecto", listaProyecto);
+						request.setAttribute("listaUsuario", listaUsuario);
+						request.setAttribute("listaTipo", listaTipo);
+						request.setAttribute("listaTarea", lista);
+						
+						request.setAttribute("operacion","Agregar");
+						request.getRequestDispatcher("tarea.jsp").forward(request, response);
+						break;
+					case 4:
+						tarea = new TareaDTO();
+						tarea.setId(Integer.parseInt(request.getParameter("id")));
+						tarea.setModulo(DaoFactory.getModuloDAOImpl().obtenerModuloPorId(Integer.parseInt(request.getParameter("modulo").trim())));
+						tarea.setProyecto(DaoFactory.getProyectoDAOImpl().obtenerProyectoPorId(Integer.parseInt(request.getParameter("proyecto").trim())));
+						tarea.setUsuario(DaoFactory.getUsuarioDAOImpl().obtenerUsuarioPorId(Integer.parseInt(request.getParameter("usuario").trim())));
+						tarea.setTipo(DaoFactory.getTipoDAOImpl().getTipoPorId(Integer.parseInt(request.getParameter("tipo").trim())));
+						tarea.setFecha_ini(obtenerFecha(request.getParameter("fecha_ini")));
+						tarea.setFecha_fin(obtenerFecha(request.getParameter("fecha_fin")));
+						tarea.setFecha_culm(obtenerFecha(request.getParameter("fecha_culm")));
+						
+						System.out.println("modulo "+ tarea.getModulo().getId());
+						System.out.println("proyecto "+ tarea.getProyecto().getId());
+						System.out.println("usuario "+ tarea.getUsuario().getId());
+						System.out.println("tipo "+ tarea.getTipo().getId());
+						System.out.println("fecha_ini "+ tarea.getFecha_ini());
+						System.out.println("fecha_fin "+ tarea.getFecha_fin());
+						System.out.println("fecha_culm "+ tarea.getFecha_culm());
+						
+						
+						DaoFactory.getTareaDAOImpl().actualizar(tarea);
+						
+						lista = DaoFactory.getTareaDAOImpl().listar();
+						listaModulo = DaoFactory.getModuloDAOImpl().listar();
+						listaProyecto = DaoFactory.getProyectoDAOImpl().listar();
+						listaUsuario = DaoFactory.getUsuarioDAOImpl().listar();
+						listaTipo = DaoFactory.getTipoDAOImpl().listar();
+						
+						request.setAttribute("listaTarea", lista);
+						request.setAttribute("listaModulo", listaModulo);
+						request.setAttribute("listaProyecto", listaProyecto);
+						request.setAttribute("listaUsuario", listaUsuario);
+						request.setAttribute("listaTipo", listaTipo);
+						request.setAttribute("listaTarea", lista);
+						
+						request.setAttribute("operacion","Modificar");
+						request.getRequestDispatcher("tarea.jsp").forward(request, response);
+						break;
+					default:
+						lista = DaoFactory.getTareaDAOImpl().listar();
+						listaModulo = DaoFactory.getModuloDAOImpl().listar();
+						listaProyecto = DaoFactory.getProyectoDAOImpl().listar();
+						listaUsuario = DaoFactory.getUsuarioDAOImpl().listar();
+						listaTipo = DaoFactory.getTipoDAOImpl().listar();
+						
+						request.setAttribute("listaTarea", lista);
+						request.setAttribute("listaModulo", listaModulo);
+						request.setAttribute("listaProyecto", listaProyecto);
+						request.setAttribute("listaUsuario", listaUsuario);
+						request.setAttribute("listaTipo", listaTipo);
+						request.setAttribute("listaTarea", lista);
+						
+						request.getRequestDispatcher("tarea.jsp").forward(request, response);
+						break;
+				}
+			}
+			else
+			{
+				request.getRequestDispatcher("tarea.jsp").forward(request, response);
+			}
+				
+		}
+		catch(Exception ex)
+		{
+			System.err.println("Error. " +ex.getMessage());		
+		}
+	}
+	
+	private static java.sql.Date obtenerFecha(String fecha)
+	{
+	     SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+	     java.sql.Date fechaFormateada = null;
+	    try {
+	        fechaFormateada = new java.sql.Date(sdf.parse(fecha).getTime());
+	    } catch (ParseException e) {
+	        e.printStackTrace();
+	    }
+	     return fechaFormateada;
+	 } 
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		this.doGet(request, response);
+	}
+
+}

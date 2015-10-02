@@ -1,0 +1,140 @@
+package py.consultoresinformaticos.servlet;
+
+import java.io.IOException;
+import java.util.List;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import py.consultoresinformaticos.DAO.DaoFactory;
+import py.consultoresinformaticos.DTO.LoginDTO;
+import py.consultoresinformaticos.DTO.ProyectoDTO;
+import py.consultoresinformaticos.DTO.ProyectoUsuarioDTO;
+import py.consultoresinformaticos.DTO.RolDTO;
+import py.consultoresinformaticos.DTO.UsuarioDTO;
+
+public class ABMProyectoUsuario extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+       
+    public ABMProyectoUsuario() {
+        super();
+    }
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+	{
+		try
+		{
+	 	 	List<ProyectoUsuarioDTO> lista;
+	 	 	List<ProyectoDTO> listaProyecto;
+	 	 	List<UsuarioDTO> listaUsuario;
+	 	 	List<RolDTO> listaRol;
+	 	 	ProyectoUsuarioDTO proyectoUsuario;
+	 	 	
+	 	 	LoginDTO usuarioLogeado = (LoginDTO)request.getSession().getAttribute("usuarioLogeado");
+	 	 	
+			String operacion = request.getParameter("operacion") == null ? "" : request.getParameter("operacion");
+			 
+	        if(usuarioLogeado != null){
+			        switch (operacion) 
+					{
+						case "Editar":
+							proyectoUsuario = DaoFactory.getProyectoUsuarioDAOImpl().obtenerProyectoUsuarioPorId(Integer.parseInt(request.getParameter("idProyecto").trim()), 
+									 Integer.parseInt(request.getParameter("idUsuario").trim()));
+	
+							request.setAttribute("proyectoUsuario", proyectoUsuario);
+	                        lista = DaoFactory.getProyectoUsuarioDAOImpl().listar();
+	                        request.setAttribute("listaProyectoUsuarios", lista);
+	                        listaProyecto = DaoFactory.getProyectoDAOImpl().listar();
+	                        request.setAttribute("listaProyecto", listaProyecto);
+	                        listaUsuario = DaoFactory.getUsuarioDAOImpl().listar();
+	                        request.setAttribute("listaUsuario", listaUsuario);
+	                        listaRol = DaoFactory.getRolDAOImpl().listar();
+	                        request.setAttribute("listaRol", listaRol);
+	                        request.setAttribute("operacion", "Editar");
+	                        
+	                        request.getRequestDispatcher("proyectoUsuario.jsp").forward(request, response);
+							break;
+						case "Eliminar":
+							
+							 DaoFactory.getProyectoUsuarioDAOImpl().borrar(Integer.parseInt(request.getParameter("idProyecto").trim()), 
+									 Integer.parseInt(request.getParameter("idUsuario")));
+							 
+	                         lista = DaoFactory.getProyectoUsuarioDAOImpl().listar();
+	                         request.setAttribute("listaProyectoUsuarios", lista);
+	                         listaProyecto = DaoFactory.getProyectoDAOImpl().listar();
+	                         request.setAttribute("listaProyecto", listaProyecto);
+	                         listaUsuario = DaoFactory.getUsuarioDAOImpl().listar();
+	                         request.setAttribute("listaUsuario", listaUsuario);
+	                         listaRol = DaoFactory.getRolDAOImpl().listar();
+	                         request.setAttribute("listaRol", listaRol);
+	                         request.setAttribute("operacion", "Eliminar");
+	                         request.getRequestDispatcher("proyectoUsuario.jsp").forward(request, response);
+							break;
+						case "Agregar":
+							proyectoUsuario = new ProyectoUsuarioDTO();
+							proyectoUsuario.setProyecto(DaoFactory.getProyectoDAOImpl().obtenerProyectoPorId(Integer.parseInt(request.getParameter("idProyecto").trim())));
+							proyectoUsuario.setUsuario(DaoFactory.getUsuarioDAOImpl().obtenerUsuarioPorId(Integer.parseInt(request.getParameter("idUsuario").trim())));
+							proyectoUsuario.setRol(DaoFactory.getRolDAOImpl().obtenerRolPorId(Integer.parseInt(request.getParameter("idRol").trim())));
+	
+	                        request.setAttribute("operacion", "Agregar");
+	                        
+	                        DaoFactory.getProyectoUsuarioDAOImpl().insertar(proyectoUsuario);
+	                        lista = DaoFactory.getProyectoUsuarioDAOImpl().listar();
+	                        request.setAttribute("listaProyectoUsuarios", lista);
+	                        listaProyecto = DaoFactory.getProyectoDAOImpl().listar();
+	                        request.setAttribute("listaProyecto", listaProyecto);
+	                        listaUsuario = DaoFactory.getUsuarioDAOImpl().listar();
+	                        request.setAttribute("listaUsuario", listaUsuario);
+	                        listaRol = DaoFactory.getRolDAOImpl().listar();
+	                        request.setAttribute("listaRol", listaRol);
+	                        request.getRequestDispatcher("proyectoUsuario.jsp").forward(request, response);
+							break;
+						case "Modificar":
+							proyectoUsuario = new ProyectoUsuarioDTO();
+							
+							proyectoUsuario.setProyecto(DaoFactory.getProyectoDAOImpl().obtenerProyectoPorId(Integer.parseInt(request.getParameter("idProyecto").trim())));
+							proyectoUsuario.setUsuario(DaoFactory.getUsuarioDAOImpl().obtenerUsuarioPorId(Integer.parseInt(request.getParameter("idUsuario").trim())));
+							proyectoUsuario.setRol(DaoFactory.getRolDAOImpl().obtenerRolPorId(Integer.parseInt(request.getParameter("idRol").trim())));
+	                        DaoFactory.getProyectoUsuarioDAOImpl().actualizar(proyectoUsuario);
+	                        lista = DaoFactory.getProyectoUsuarioDAOImpl().listar();
+	                        request.setAttribute("listaProyectoUsuarios", lista);  
+	                        listaProyecto = DaoFactory.getProyectoDAOImpl().listar();
+	                        request.setAttribute("listaProyecto", listaProyecto);
+	                        listaUsuario = DaoFactory.getUsuarioDAOImpl().listar();
+	                        request.setAttribute("listaUsuario", listaUsuario);
+	                        listaRol = DaoFactory.getRolDAOImpl().listar();
+	                        request.setAttribute("listaRol", listaRol);
+	                        request.setAttribute("operacion", "Modificar");
+	                        
+	                        request.getRequestDispatcher("proyectoUsuario.jsp").forward(request, response);
+							break;
+						default:
+	                        lista = DaoFactory.getProyectoUsuarioDAOImpl().listar();
+	                        request.setAttribute("listaProyectoUsuarios", lista);
+	                        listaProyecto = DaoFactory.getProyectoDAOImpl().listar();
+	                        request.setAttribute("listaProyecto", listaProyecto);
+	                        listaUsuario = DaoFactory.getUsuarioDAOImpl().listar();
+	                        request.setAttribute("listaUsuario", listaUsuario);
+	                        request.setAttribute("operacion", "Listar");
+	                        listaRol = DaoFactory.getRolDAOImpl().listar();
+	                        request.setAttribute("listaRol", listaRol);
+	                        request.setAttribute("operacion", "Listar");
+	                        request.getRequestDispatcher("proyectoUsuario.jsp").forward(request, response);
+							break;
+					}
+	         }else{
+	                 request.getRequestDispatcher("login.jsp").forward(request, response);
+	         }
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doGet(request, response);
+	}
+
+}

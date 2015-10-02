@@ -1,0 +1,128 @@
+package py.consultoresinformaticos.DAO.impl;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import py.consultoresinformaticos.DAO.ActividadDao;
+import py.consultoresinformaticos.DAO.DaoFactory;
+import py.consultoresinformaticos.DTO.ActividadDTO;
+import py.consultoresinformaticos.connections.ManejadorBD;
+
+public class ActividadDAOImpl implements ActividadDao{
+	
+	@Override
+	public void insertar(ActividadDTO actividad) {
+		/*
+		String sql = "INSERT INTO actividad (descripcion, hora, tarea, foto) VALUES (?, ?, ?, ?)";
+		PreparedStatement stm;
+		try {
+			stm = ManejadorBD.getCon().prepareStatement(sql);
+			stm.setString(1, actividad.getDescripcion());
+			stm.setTime(2, actividad.getHora());
+			stm.setInt(3, actividad.getTarea());
+			stm.setString(4, actividad.getFoto());
+			stm.executeUpdate();
+		} catch (SQLException e) {
+			System.err.println("No se pudo insertar la actividad. " +e.getMessage());
+		}
+		 */	
+	}
+	
+
+	@Override
+	public void borrar(int id) {
+		String sql ="DELETE FROM actividad WHERE id="+id;
+		PreparedStatement stm;
+		try
+		{
+			stm = ManejadorBD.getCon().prepareStatement(sql);
+			stm.executeUpdate();
+		}
+		catch(SQLException e)
+		{
+			 System.err.println("No se pudo eliminar la actividad." +e.getMessage());
+		}
+	}
+
+	@Override
+	public void actualizar(ActividadDTO actividad) {
+		String sql ="UPDATE actividad SET descripcion=? WHERE id=?";
+		PreparedStatement stm;
+        try {
+			stm = ManejadorBD.getCon().prepareStatement(sql);
+			stm.setString(1,actividad.getDescripcion());
+	        stm.setInt(2, actividad.getId());
+	        stm.executeUpdate();
+		} catch (SQLException e) {
+			System.err.println("No se pudo actualizar la actividad. " + e.getMessage());
+		}
+	}
+
+	@Override
+	public ActividadDTO getActividadPorId(int id) {
+		ActividadDTO actividad = null;
+		String sql = "SELECT id, descripcion, hora, tarea, imagen, estampa FROM actividad where id = "+id;
+		PreparedStatement stm; 
+		ResultSet rs = null;
+		try {
+			stm = ManejadorBD.getCon().prepareStatement(sql);
+			rs = stm.executeQuery();
+			while(rs.next())
+			{
+				actividad = new ActividadDTO();
+				actividad.setId(rs.getInt("id"));
+				actividad.setDescripcion(rs.getString("descripcion"));
+				actividad.setHora(rs.getTime("hora"));
+				actividad.setTarea(DaoFactory.getTareaDAOImpl().getTareaPorId(rs.getInt("tarea")));
+				actividad.setImagen("dir imagen");
+				actividad.setEstampa(new java.sql.Date(rs.getLong("estampa")*1000));
+			}
+		} catch (SQLException e) {
+			System.err.println("No se pudo retornar el id de la actividad. " +e.getMessage());
+		}
+		return actividad;
+	}
+
+	@Override
+	public List<ActividadDTO> listar() {
+		String sql = "SELECT id, descripcion, hora, tarea, imagen, estampa FROM actividad";
+		PreparedStatement stm;
+		ResultSet rs = null;
+		List<ActividadDTO> listaActividad = new ArrayList<ActividadDTO>();
+		ActividadDTO actividad = null;
+		try {
+			stm = ManejadorBD.getCon().prepareStatement(sql);
+			rs = stm.executeQuery();
+			while(rs.next()){
+				actividad = new ActividadDTO();
+				actividad.setId(rs.getInt("id"));
+				actividad.setDescripcion(rs.getString("descripcion"));
+				actividad.setHora(rs.getTime("hora"));
+				actividad.setTarea(DaoFactory.getTareaDAOImpl().getTareaPorId(rs.getInt("tarea")));
+				actividad.setImagen("dir imagen");
+				actividad.setEstampa(new java.sql.Date(rs.getLong("estampa")*1000));
+				listaActividad.add(actividad);
+			}
+		} catch (SQLException e) {
+			System.err.println("No se pudo listar. " +e.getMessage());
+		}
+		return listaActividad;
+	}
+	
+	/*
+	 	private static String obtenerFecha(Long fecha){
+		Date fechaActividad = new Date(fecha);
+		System.out.println("now: "+fechaActividad);
+		DateFormat df = new SimpleDateFormat ("yyyy/MM/dd"); 
+		String currentTime = df.format(fechaActividad);
+		System.out.println("fechaActividad: "+new java.sql.Date(fecha));
+		return currentTime;
+	 }
+	 */
+}

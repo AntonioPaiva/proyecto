@@ -1,0 +1,102 @@
+<%@include file="tpl/header.jsp" %>
+	<div class="gantt"></div>
+  <script>
+		function someFunc(tarea){
+			console.debug("tarea : " + tarea);
+			$('#detalleTarea p').empty();
+	    	$.get("ConsultaAjax", { tarea : tarea , origen : "TAREAGANTT"  }, function(responseJson){
+				
+				/*$.each(responseJson, function(index, tarea) {
+					console.debug("hola:" + tarea);
+				});*/
+				console.debug(responseJson);
+				$( "#detalleTarea" ).append( "<p>Proyecto : <b>" + responseJson.proyecto.descripcion + "</b></p>" +  
+				"<p>Componente : <b>" + responseJson.modulo.componente.descripcion + "</b></p>" +
+				"<p>Modulo : <b>" + responseJson.modulo.descripcion + "</b></p>" +
+				"<p>Porcentaje de Avance : <b>(" + responseJson.avance + "%)</b></p>" +
+				"<p>Encargado : <b>" + responseJson.usuario.nombre + " " + responseJson.usuario.apellido + "</b></p>");
+				
+			});
+			$('#botonModal').click();
+		}
+  
+		$(function() {
+			
+	    	$.get("ConsultaAjax", { origen: "GANTT" }, function(responseJson){
+				console.debug(responseJson);
+				var json;
+				var json2;
+				var b = 1;
+				$.each(responseJson, function(index, lista) {
+					console.debug(lista.values.label);
+					if(b==1){
+						json = [{
+							"name"   : lista.name,
+							"desc"   : lista.desc,
+							"values" : [{
+								"from"  	  : lista.values.from,
+								"to"    	  : lista.values.to,
+								"label" 	  : lista.values.label,
+								"customClass" : lista.values.customClass
+							}]
+						}];
+						b=0;
+					}else{
+						json2 = [{
+							"name"   : lista.name,
+							"desc"   : lista.desc,
+							"values" : [{
+								"from"  	  : lista.values.from,
+								"to"    	  : lista.values.to,
+								"label" 	  : lista.values.label,
+								"customClass" : lista.values.customClass
+							}]
+						}];
+						json = json.concat(json2);
+					}
+					
+				});
+	    	
+			"use strict";
+			$(".gantt").gantt({
+				source: json,
+				navigate: "scroll",
+				maxScale: "hours",
+				itemsPerPage: 10,
+				onRender: function() {
+					if (window.console && typeof console.log === "function") {
+						console.log("chart rendered");
+					}
+				}
+			});
+
+			$(".gantt").popover({
+				selector: ".bar",
+				title: "I'm a popover",
+				content: "And I'm the content of said popover.",
+				trigger: "hover"
+			});
+
+			prettyPrint();
+	    	
+	    	});
+		});
+  </script>
+  
+  	<a id="botonModal" data-toggle="modal" href="#example" style="display: none;"></a>
+	<div id="example" class="modal hide fade in" style="display: none;">
+	    <div class="modal-header">
+	        <a data-dismiss="modal" class="close">×</a>
+	        <h3 id="tituloGantt">Carta Gantt</h3>
+		</div>
+	    <div class="modal-body">
+			<h5>Datos Generales</h5>
+			<div id="detalleTarea">
+			</div>
+	    </div>
+	    <div class="modal-footer">
+	        <a href="#" data-dismiss="modal" class="btn btn-danger">Cerrar</a>
+	    </div>
+	</div>  
+
+<%@include file="tpl/footer.jsp" %>  

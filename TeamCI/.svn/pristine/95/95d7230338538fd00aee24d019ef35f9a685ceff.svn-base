@@ -1,0 +1,72 @@
+<%@include file="tpl/header.jsp" %>
+<body>
+	<div class="gantt"></div>
+  <script>
+		$(function() {
+
+	    	$.get("ConsultaAjax", { origen: "GANTT" }, function(responseJson){
+				console.debug(responseJson);
+				var json;
+				var json2;
+				var b = 1;
+				$.each(responseJson, function(index, lista) {
+					if(b==1){
+						json = [{
+							"name"   : lista.name,
+							"desc"   : lista.desc,
+							"values" : [{
+								"from"  	  : lista.values.from,
+								"to"    	  : lista.values.to,
+								"label" 	  : lista.values.label,
+								"customClass" : lista.values.customClass
+							}]
+						}];
+						b=0;
+					}
+					json2 = [{
+						"name"   : lista.name,
+						"desc"   : lista.desc,
+						"values" : [{
+							"from"  	  : lista.values.from,
+							"to"    	  : lista.values.to,
+							"label" 	  : lista.values.label,
+							"customClass" : lista.values.customClass
+						}]
+					}];
+					json.concat(json2);
+				});
+				
+	    	
+			"use strict";
+			$(".gantt").gantt({
+				source: json,
+				navigate: "scroll",
+				maxScale: "hours",
+				itemsPerPage: 10,
+				onItemClick: function(data) {
+					alert("Item clicked - show some details");
+				},
+				onAddClick: function(dt, rowId) {
+					alert("Empty space clicked - add an item!");
+				},
+				onRender: function() {
+					if (window.console && typeof console.log === "function") {
+						console.log("chart rendered");
+					}
+				}
+			});
+
+			$(".gantt").popover({
+				selector: ".bar",
+				title: "I'm a popover",
+				content: "And I'm the content of said popover.",
+				trigger: "hover"
+			});
+
+			prettyPrint();
+
+			
+	    	});
+		});
+  </script>
+<%@include file="tpl/footer.jsp" %>  

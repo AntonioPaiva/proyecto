@@ -1,0 +1,90 @@
+package py.consultoresinformaticos.imagenes;
+
+import java.util.List;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.google.gson.Gson;
+
+import py.consultoresinformaticos.DAO.DaoFactory;
+import py.consultoresinformaticos.DTO.ModuloDTO;
+import py.consultoresinformaticos.DTO.TareaDTO;
+import py.consultoresinformaticos.utils.LoggerGx;
+
+public class Prueba extends HttpServlet {
+
+	private static final long serialVersionUID = 1L;
+
+	protected void tareasAjax(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, java.io.IOException {
+        try{
+			List<ModuloDTO> modulos = DaoFactory.getModuloDAOImpl().listar();
+		    String json = new Gson().toJson(modulos);
+        	
+		    response.setContentType("application/json");
+		    response.setCharacterEncoding("UTF-8");
+		    response.getWriter().write(json);
+        }catch(Exception ex){
+        	LoggerGx.log("Prueba > Error " + ex.getMessage());
+        }
+	}
+
+	protected void hitosAjax(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, java.io.IOException {
+        try{        	
+			List<TareaDTO> tareas = DaoFactory.getTareaDAOImpl().listar();
+		    String json = new Gson().toJson(tareas);
+        	
+		    response.setContentType("application/json");
+		    response.setCharacterEncoding("UTF-8");
+		    response.getWriter().write(json);
+        }catch(Exception ex){
+        	LoggerGx.log("Prueba > Error " + ex.getMessage());
+        }
+	}
+	
+	protected void doGet(HttpServletRequest request,HttpServletResponse response)
+			throws ServletException, java.io.IOException 
+	{
+		try
+		{
+			String origen = request.getParameter("origen").toString();
+			switch (origen) 
+			{
+				case "HITOS":
+					hitosAjax(request, response);
+					break;
+				case "TAREAS":
+					tareasAjax(request, response);
+					break;
+			}
+		}catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, java.io.IOException 
+	{
+		try
+		{
+			String origen = request.getParameter("origen").toString();
+			switch (origen) 
+			{
+				case "HITOS":
+					hitosAjax(request, response);
+					break;
+				case "TAREAS":
+					tareasAjax(request, response);
+					break;
+			}
+		}catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+	}
+}

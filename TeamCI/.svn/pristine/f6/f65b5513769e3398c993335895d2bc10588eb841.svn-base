@@ -1,0 +1,73 @@
+package py.consultoresinformaticos.servlet;
+
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.List;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import py.consultoresinformaticos.DAO.DaoFactory;
+import py.consultoresinformaticos.DTO.ComponenteDTO;
+import py.consultoresinformaticos.DTO.HitoDTO;
+import py.consultoresinformaticos.DTO.LoginDTO;
+import py.consultoresinformaticos.DTO.ProyectoDTO;
+import py.consultoresinformaticos.DTO.RolDTO;
+
+public class ABMHitoTarea extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+       
+    public ABMHitoTarea() {
+        super();
+    }
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		try
+		{
+	 	 	List<RolDTO> lista;
+	 	 	RolDTO rol;
+			String operacion = request.getParameter("operacion") == null ? "" : request.getParameter("operacion");
+			
+	        switch (operacion) 
+			{
+				case "Eliminar":
+					 DaoFactory.getRolDAOImpl().borrar(Integer.parseInt(request.getParameter("id")));
+                     lista = DaoFactory.getRolDAOImpl().listar();
+                     request.setAttribute("listaRoles", lista);
+                     request.setAttribute("operacion", "Eliminar");
+                     request.getRequestDispatcher("rol.jsp").forward(request, response);
+					break;
+				case "Agregar":
+					rol = new RolDTO();
+					rol.setDescripcion(request.getParameter("descripcionRol"));
+
+                    request.setAttribute("operacion", "Agregar");
+                    
+                    DaoFactory.getRolDAOImpl().insertar(rol);
+                    lista = DaoFactory.getRolDAOImpl().listar();
+                    
+                    request.setAttribute("listaRoles", lista);        
+                    request.getRequestDispatcher("rol.jsp").forward(request, response);
+					break;
+				default:
+                    lista = DaoFactory.getRolDAOImpl().listar();
+                    request.setAttribute("listaRoles", lista);
+                    request.setAttribute("operacion", "Listar");
+                    request.getRequestDispatcher("rol.jsp").forward(request, response);
+					break;
+			}
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}		
+	}
+	
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+	{
+		this.doGet(request, response);
+	}
+
+}

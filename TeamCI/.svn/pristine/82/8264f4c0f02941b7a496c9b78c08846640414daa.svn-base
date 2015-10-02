@@ -1,0 +1,13 @@
+package py.consultoresinformaticos.DAO;
+
+import java.util.List;
+
+import py.consultoresinformaticos.DTO.HitosDTO;
+
+public interface HitosDao {
+	public void insertar(HitosDTO actividad);
+	public void borrar(int id);
+	public void actualizar(HitosDTO actividad);
+	public HitosDTO getHitosPorId(int id);
+	public List<HitosDTO> listar();
+}

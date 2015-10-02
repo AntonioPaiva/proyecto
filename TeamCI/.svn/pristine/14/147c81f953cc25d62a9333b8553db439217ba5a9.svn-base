@@ -1,0 +1,85 @@
+<%@include file="tpl/header.jsp" %>
+<%@page import="py.consultoresinformaticos.DTO.*"%>
+<%@page import="py.consultoresinformaticos.DAO.impl.*" %>
+<%@page import="java.util.Iterator"%>
+<%@page import="java.util.List"%>
+<% List<ProyectoDTO> listaProyecto = (List<ProyectoDTO>) request.getAttribute("listaProyecto");%>
+<% List<ComponenteDTO> listaComponentes = (List<ComponenteDTO>) request.getAttribute("listaComponentes");%>
+<% List<HitosDTO> listaHitos = (List<HitosDTO>) request.getAttribute("listaHitos ");%>
+<% List<TareaDTO> listaTarea = (List<TareaDTO>) request.getAttribute("listaTarea");%>
+<% String operacion = (String)request.getAttribute("operacion"); %>
+<% HitosDTO hitos = (HitosDTO) request.getAttribute("hitos"); %>
+<% Iterator<HitosDTO> it; %>
+<% Iterator<ProyectoDTO> itProyecto; %>
+<% Iterator<ComponenteDTO> itComponentes; %>
+	<script>
+		$(function() {
+		    var titulo = $('title').html();
+		    $('title').html(titulo + " | Hitos");
+		    
+		    $(document).ready(function() {
+				var $table = $('<table>').appendTo($('#hitos'));
+		    	$table.attr('class','table table-bordered');
+			    
+		    	
+		    	$("#comboProyecto").change(function(){
+			    	$('#hitos table').empty();
+			    	var idComponente = $('#comboProyecto').val();
+			    	$.get("Prueba", { idComponente: idComponente, origen : "HITOS"  }, function(responseJson){
+		            	$('<tr>').appendTo($table)
+	                        .append($('<th class="td-center">').text("Modulo"))
+	                        .append($('<th class="td-center">').text("Tipo"))
+	                        .append($('<th class="td-center">').text("Fecha Finalización"))
+		            		.append($('<th class="td-center">').text("Operación"));
+			    		$.each(responseJson, function(index, tareas) {
+			    			if(idComponente == tareas.modulo.componente.id){	
+				            	$('<tr id="row">').appendTo($table)
+				                        .append($('<td class="td-center">').text(tareas.modulo.descripcion))
+				                        .append($('<td class="td-center">').text(tareas.tipo.descripcion))
+				                        .append($('<td class="td-center">').text($.datepicker.formatDate('dd-mm-yy', new Date(tareas.fecha_fin))))
+				            			.append($('<td class="td-center">').append('<a href="HitosTareas"><i class="icon-plus"></i></a>'));
+			    			}
+			    			//console.debug("fecha fin: " + $.datepicker.formatDate('dd-mm-yy', new Date(tareas.fecha_fin)) );
+			    			//console.debug("fecha fin 2: " + tareas.fecha_fin);
+			    		});
+					});
+				});
+			});
+	   });
+	</script>
+	<form action="Hitos" method="post" onsubmit="return validarCamposHitos()"  class="form-horizontal">
+		<h1 align="center">
+			HITOS
+		</h1>
+		<br>
+		<div class="container">
+			<div class="row">
+				<div class="span10">
+					<div class="container">
+					<label for="comboProyecto">Proyecto:</label>
+						<select class="combobox" name="comboProyecto" id="comboProyecto">
+							<%
+				               	if(listaComponentes != null){
+				      	     		itComponentes = listaComponentes.iterator();
+				                       while(itComponentes.hasNext()){
+		                               	ComponenteDTO c = itComponentes.next();
+				             %>
+							<option value="<%= c.getId()%>" <%=  hitos == null ? "" : (hitos.getProyecto().getId() == c.getId() ? "selected=\"selected\"" : "")%> ><%= c.getProyecto().getDescripcion() +" - "+c.getDescripcion()%></option>
+									<% }
+								 }%>
+						</select>
+					<br>
+				</div>
+			</div>
+		</div>
+	</div>
+	<br>
+	<div class="container">
+		<div class="row">
+			<div class="span8" id="hitos">
+
+			</div>
+		</div>
+	</div>
+	</form>
+<%@include file="tpl/footer.jsp" %>

@@ -1,0 +1,25 @@
+package py.consultoresinformaticos.DTO;
+
+public class HitoTareaDTO {
+	
+	private HitosDTO hito;
+	private TareaDTO tarea;
+	
+	public HitosDTO getHito() {
+		return hito;
+	}
+	
+	public void setHito(HitosDTO hito) {
+		this.hito = hito;
+	}
+	
+	public TareaDTO getTarea() {
+		return tarea;
+	}
+	
+	public void setTarea(TareaDTO tarea) {
+		this.tarea = tarea;
+	}
+	
+}
+

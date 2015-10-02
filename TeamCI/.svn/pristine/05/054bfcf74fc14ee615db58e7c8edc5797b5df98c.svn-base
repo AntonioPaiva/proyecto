@@ -1,0 +1,42 @@
+package py.consultoresinformaticos.DAO.impl;
+
+import java.util.List;
+
+import py.consultoresinformaticos.DAO.HitosDao;
+import py.consultoresinformaticos.DTO.HitosDTO;
+
+public class HitosDAOImpl implements HitosDao{
+
+	@Override
+	public void insertar(HitosDTO actividad) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void borrar(int id) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void actualizar(HitosDTO actividad) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public HitosDTO getHitosPorId(int id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<HitosDTO> listar() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	
+
+}
